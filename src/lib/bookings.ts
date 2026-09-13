@@ -78,9 +78,15 @@ export function consecutiveRun(slots: Slot[], index: number, n: number): Slot[] 
 
   const run = slots.slice(index, index + n);
   for (let i = 1; i < run.length; i += 1) {
-    const previousEnd = new Date(run[i - 1].ends_at).getTime();
-    const thisStart = new Date(run[i].starts_at).getTime();
-    if (previousEnd !== thisStart) return null;
+    const previous = run[i - 1];
+    const current = run[i];
+    // `noUncheckedIndexedAccess` is on, so an index read is `Slot | undefined`.
+    // The bounds check above already rules this out; satisfy the compiler rather
+    // than assert past it.
+    if (!previous || !current) return null;
+    if (new Date(previous.ends_at).getTime() !== new Date(current.starts_at).getTime()) {
+      return null;
+    }
   }
   return run;
 }
