@@ -133,6 +133,94 @@ export type Database = {
           },
         ]
       }
+      booking_slots: {
+        Row: {
+          booking_id: string
+          slot_id: string
+        }
+        Insert: {
+          booking_id: string
+          slot_id: string
+        }
+        Update: {
+          booking_id?: string
+          slot_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "booking_slots_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "booking_slots_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings_with_start"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "booking_slots_slot_id_fkey"
+            columns: ["slot_id"]
+            isOneToOne: false
+            referencedRelation: "bookable_slots"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bookings: {
+        Row: {
+          created_at: string
+          customer_id: string
+          id: string
+          paid_at: string | null
+          payout_id: string | null
+          price: number
+          service_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          customer_id: string
+          id?: string
+          paid_at?: string | null
+          payout_id?: string | null
+          price: number
+          service_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          customer_id?: string
+          id?: string
+          paid_at?: string | null
+          payout_id?: string | null
+          price?: number
+          service_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bookings_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       platform_settings: {
         Row: {
           currency: string
@@ -269,8 +357,69 @@ export type Database = {
           },
         ]
       }
+      bookings_with_start: {
+        Row: {
+          created_at: string | null
+          customer_id: string | null
+          ends_at: string | null
+          id: string | null
+          paid_at: string | null
+          payout_id: string | null
+          price: number | null
+          service_id: string | null
+          starts_at: string | null
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          customer_id?: string | null
+          ends_at?: never
+          id?: string | null
+          paid_at?: string | null
+          payout_id?: string | null
+          price?: number | null
+          service_id?: string | null
+          starts_at?: never
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          customer_id?: string | null
+          ends_at?: never
+          id?: string | null
+          paid_at?: string | null
+          payout_id?: string | null
+          price?: number | null
+          service_id?: string | null
+          starts_at?: never
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bookings_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
+      create_booking: {
+        Args: { p_service_id: string; p_start_slot_id: string }
+        Returns: string
+      }
       is_admin: { Args: never; Returns: boolean }
     }
     Enums: {
