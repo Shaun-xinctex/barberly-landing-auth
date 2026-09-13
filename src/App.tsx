@@ -6,7 +6,7 @@ import { AppErrorBoundary } from "@/components/error-boundary";
 import { RequireAuth } from "@/components/require-auth";
 import { RequireShop } from "@/components/require-shop";
 import { supabase } from "@/integrations/supabase/client";
-import AppSpace from "@/pages/AppSpace";
+import Barbers from "@/pages/Barbers";
 import Landing from "@/pages/Landing";
 import Login from "@/pages/Login";
 import NotFound from "@/pages/NotFound";
@@ -36,16 +36,12 @@ export default function App() {
           <Route path="/sign-in" element={<Login initialMode="signin" />} />
           <Route path="/sign-up" element={<Login initialMode="signup" />} />
 
-          {/* Authenticated app shell. /barbers is the canonical post-login
-              route for this project — see .claude/skills/m0-landing-page. */}
-          <Route
-            path="/barbers"
-            element={
-              <RequireAuth>
-                <AppSpace />
-              </RequireAuth>
-            }
-          />
+          {/* Customer surfaces. /barbers is the canonical post-login route for this
+              project (see .claude/skills/m0-landing-page) and, from M1.2 on, the
+              PUBLIC browse page: anyone may look at barbers, only booking needs an
+              account. The signed-in shell that used to live here is gone — its one
+              action, "Become a shop", moved into <SiteHeader>. */}
+          <Route path="/barbers" element={<Barbers />} />
 
           {/* Shop-side surfaces. RequireShop gates on profiles.role === "shop". */}
           <Route
