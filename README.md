@@ -84,13 +84,58 @@ Continue developing this project in the [Lovable editor](https://lovable.dev/pro
 - **Stay in sync**: every change made in Lovable is committed straight to this repository.
 - **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
 
+## Stack
+
+Plain **Vite + React 19 SPA** — no SSR, no server runtime. `vite build` emits a
+fully static bundle to `dist/`, deployed to Vercel as a static site.
+
+- Routing: **React Router** (`react-router-dom`), client-side only
+- Styling: Tailwind CSS v4 + shadcn/ui (unchanged)
+- Auth/data: Supabase JS client, browser-side (unchanged)
+
+### Routes
+
+| Path | Page |
+| --- | --- |
+| `/` | Public landing page |
+| `/login` | Combined sign-in / sign-up |
+| `/sign-in` | Same page, sign-in tab preselected |
+| `/sign-up` | Same page, sign-up tab preselected |
+| `/app` | Authenticated shell (redirects to `/login` when signed out) |
+| `/barbers` | Legacy path — redirects to `/app` |
+| anything else | 404 page |
+
+Deep links such as `/app` are served by the SPA fallback in `vercel.json`
+(every path rewrites to `/index.html`, after the static-file check), then
+resolved client-side by React Router.
+
 ## Development
 
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
+You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
 
 ```sh
 git clone <this-repository-url>
 cd <repository-name>
-npm i
-npm run dev
+npm install
+npm run dev      # dev server on http://localhost:8080
+npm run build    # static production build -> dist/
+npm run preview  # serve the built bundle locally
 ```
+
+### Environment variables
+
+The Supabase client reads these at build time (they must be set in Vercel's
+project settings as well as in local `.env`):
+
+```
+VITE_SUPABASE_URL
+VITE_SUPABASE_PUBLISHABLE_KEY
+VITE_SUPABASE_PROJECT_ID
+```
+
+## Deploying to Vercel
+
+Import the repo in Vercel; `vercel.json` already pins the framework preset
+(`vite`), the build command, the output directory (`dist/`) and the SPA
+fallback rewrite. Add the `VITE_*` variables above under Project Settings →
+Environment Variables before the first build.

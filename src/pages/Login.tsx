@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState, type FormEvent } from "react";
 import { ArrowLeft, Eye, EyeOff, Scissors } from "lucide-react";
 
@@ -6,27 +6,20 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { usePageMeta } from "@/hooks/use-page-meta";
 import { supabase } from "@/integrations/supabase/client";
 
 type Role = "customer" | "shop";
+type Mode = "signin" | "signup";
 
-export const Route = createFileRoute("/login")({
-  head: () => ({
-    meta: [
-      { title: "Sign In or Join — Barberly" },
-      { name: "description", content: "Sign in to Barberly or create an account as a customer or barber." },
-      { property: "og:title", content: "Sign In or Join — Barberly" },
-      { property: "og:description", content: "Access your Barberly account or join the marketplace." },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-  }),
-  component: LoginPage,
-});
+export default function LoginPage({ initialMode = "signin" }: { initialMode?: Mode }) {
+  usePageMeta({
+    title: "Sign In or Join — Barberly",
+    description: "Sign in to Barberly or create an account as a customer or barber.",
+  });
 
-function LoginPage() {
   const navigate = useNavigate();
-  const [mode, setMode] = useState<"signin" | "signup">("signin");
+  const [mode, setMode] = useState<Mode>(initialMode);
   const [role, setRole] = useState<Role>("customer");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -36,7 +29,7 @@ function LoginPage() {
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
-      if (data.user) navigate({ to: "/barbers", replace: true });
+      if (data.user) navigate("/app", { replace: true });
     });
   }, [navigate]);
 
@@ -65,7 +58,7 @@ function LoginPage() {
       return;
     }
 
-    await navigate({ to: "/barbers", replace: true });
+    navigate("/app", { replace: true });
   }
 
   return (

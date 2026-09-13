@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { Link } from "react-router-dom";
 import {
   ArrowUpRight,
   Award,
@@ -12,6 +12,7 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { usePageMeta } from "@/hooks/use-page-meta";
 import heroLeft from "@/assets/hero-barber-left.jpg";
 import heroRight from "@/assets/hero-stylist-right.jpg";
 import kenjiPortrait from "@/assets/barber-kenji.jpg";
@@ -65,26 +66,6 @@ const barbers = [
   },
 ];
 
-export const Route = createFileRoute("/")({
-  head: () => ({
-    meta: [
-      { title: "Barberly — Find Your Next Barber" },
-      {
-        name: "description",
-        content: "Discover top-rated barbers and hairstylists, compare services, and find your next look with Barberly.",
-      },
-      { property: "og:title", content: "Barberly — Find Your Next Barber" },
-      {
-        property: "og:description",
-        content: "Discover top-rated barbers and hairstylists in a few taps.",
-      },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-  }),
-  component: Index,
-});
-
 function SearchField({ compact = false }: { compact?: boolean }) {
   return (
     <div className="relative w-full">
@@ -101,7 +82,13 @@ function SearchField({ compact = false }: { compact?: boolean }) {
   );
 }
 
-function Index() {
+export default function Index() {
+  usePageMeta({
+    title: "Barberly — Find Your Next Barber",
+    description:
+      "Discover top-rated barbers and hairstylists, compare services, and find your next look with Barberly.",
+  });
+
   return (
     <main className="min-h-screen overflow-hidden bg-background">
       <header className="relative z-20 border-b border-border/70 bg-background/95">

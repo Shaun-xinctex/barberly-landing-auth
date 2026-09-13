@@ -1,26 +1,20 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
+import { Link, useNavigate } from "react-router-dom";
 import { Scissors } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { usePageMeta } from "@/hooks/use-page-meta";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuthedUser } from "@/lib/authed-user-context";
 
-export const Route = createFileRoute("/_authenticated/barbers")({
-  head: () => ({
-    meta: [
-      { title: "Your Barberly Space" },
-      { name: "description", content: "Your role-aware Barberly account space." },
-      { property: "og:title", content: "Your Barberly Space" },
-      { property: "og:description", content: "Your role-aware Barberly account space." },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-  }),
-  component: BarbersShell,
-});
+export default function BarbersShell() {
+  usePageMeta({
+    title: "Your Barberly Space",
+    description: "Your role-aware Barberly account space.",
+  });
 
-function BarbersShell() {
-  const { user } = Route.useRouteContext();
-  const { queryClient } = Route.useRouteContext();
+  const user = useAuthedUser();
+  const queryClient = useQueryClient();
   const navigate = useNavigate();
   const isBarber = user.user_metadata?.["role"] === "shop";
 
@@ -28,7 +22,7 @@ function BarbersShell() {
     await queryClient.cancelQueries();
     queryClient.clear();
     await supabase.auth.signOut();
-    await navigate({ to: "/login", replace: true });
+    navigate("/login", { replace: true });
   }
 
   return (
