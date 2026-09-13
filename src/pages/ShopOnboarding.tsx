@@ -178,7 +178,11 @@ function PhotoManager({ barber }: { barber: Barber }) {
 
         const { error: uploadError } = await supabase.storage
           .from(PHOTO_BUCKET)
-          .upload(storagePath, file, { contentType: file.type || undefined });
+          // `exactOptionalPropertyTypes` is on, so an explicit `undefined` is not the
+          // same as omitting the key: FileOptions.contentType is `string`, and
+          // `contentType: undefined` fails to type-check. Omit it instead when the
+          // browser gave us no type.
+          .upload(storagePath, file, file.type ? { contentType: file.type } : {});
         if (uploadError) throw uploadError;
 
         const { error: insertError } = await supabase.from("barber_photos").insert({
