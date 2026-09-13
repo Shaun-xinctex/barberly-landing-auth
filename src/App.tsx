@@ -4,11 +4,14 @@ import { Navigate, Route, Routes } from "react-router-dom";
 
 import { AppErrorBoundary } from "@/components/error-boundary";
 import { RequireAuth } from "@/components/require-auth";
+import { RequireShop } from "@/components/require-shop";
 import { supabase } from "@/integrations/supabase/client";
 import AppSpace from "@/pages/AppSpace";
 import Landing from "@/pages/Landing";
 import Login from "@/pages/Login";
 import NotFound from "@/pages/NotFound";
+import ShopBookings from "@/pages/ShopBookings";
+import ShopOnboarding from "@/pages/ShopOnboarding";
 
 export default function App() {
   const [queryClient] = useState(() => new QueryClient());
@@ -40,6 +43,28 @@ export default function App() {
             element={
               <RequireAuth>
                 <AppSpace />
+              </RequireAuth>
+            }
+          />
+
+          {/* Shop-side surfaces. RequireShop gates on profiles.role === "shop". */}
+          <Route
+            path="/shop"
+            element={
+              <RequireAuth>
+                <RequireShop>
+                  <ShopOnboarding />
+                </RequireShop>
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/shop/bookings"
+            element={
+              <RequireAuth>
+                <RequireShop>
+                  <ShopBookings />
+                </RequireShop>
               </RequireAuth>
             }
           />

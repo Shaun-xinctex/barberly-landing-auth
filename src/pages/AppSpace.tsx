@@ -1,4 +1,4 @@
-import { useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "react-router-dom";
 import { Scissors } from "lucide-react";
 
@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { usePageMeta } from "@/hooks/use-page-meta";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthedUser } from "@/lib/authed-user-context";
+import { useMyProfile } from "@/lib/profile";
 
 export default function BarbersShell() {
   usePageMeta({
@@ -16,7 +17,23 @@ export default function BarbersShell() {
   const user = useAuthedUser();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
-  const isBarber = user.user_metadata?.["role"] === "shop";
+
+  // Role comes from `profiles.role` — the source of truth since M1.1.
+  // (M0 read it from auth user_metadata; that is no longer consulted.)
+  const { data: profile } = useMyProfile();
+  const isShop = profile?.role === "shop";
+
+  const becomeShop = useMutation({
+    mutationFn: async () => {
+      // The upgrade path only ever writes 'shop'. 'admin' is never self-served.
+      const { error } = await supabase.from("profiles").update({ role: "shop" }).eq("id", user.id);
+      if (error) throw error;
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["my-profile"] });
+      navigate("/shop", { replace: true });
+    },
+  });
 
   async function handleSignOut() {
     await queryClient.cancelQueries();
@@ -29,11 +46,38 @@ export default function BarbersShell() {
     <main className="min-h-screen bg-warm">
       <header className="border-b border-border bg-background">
         <div className="mx-auto flex min-h-20 max-w-7xl flex-wrap items-center gap-3 px-5 py-4 md:px-8">
-          <Link to="/" className="font-display text-3xl font-semibold">Barberly</Link>
+          <Link to="/" className="font-display text-3xl font-semibold">
+            Barberly
+          </Link>
           <div className="ml-auto flex flex-wrap items-center justify-end gap-3">
-            <span className="max-w-[15rem] truncate text-sm text-muted-foreground">Hi {user.email}</span>
-            {isBarber && <span className="rounded-full bg-secondary px-3 py-1 text-xs font-bold text-secondary-foreground">barber</span>}
-            <Button variant="outline" className="rounded-full bg-background shadow-none" onClick={handleSignOut}>Sign Out</Button>
+            <span className="max-w-[15rem] truncate text-sm text-muted-foreground">
+              Hi {user.email}
+            </span>
+            {isShop ? (
+              <>
+                <span className="rounded-full bg-secondary px-3 py-1 text-xs font-bold text-secondary-foreground">
+                  shop
+                </span>
+                <Button asChild variant="outline" className="rounded-full bg-background shadow-none">
+                  <Link to="/shop">理髮店後台 / Shop dashboard</Link>
+                </Button>
+              </>
+            ) : (
+              <Button
+                className="rounded-full"
+                disabled={becomeShop.isPending}
+                onClick={() => becomeShop.mutate()}
+              >
+                {becomeShop.isPending ? "Please wait…" : "開店 / Become a shop"}
+              </Button>
+            )}
+            <Button
+              variant="outline"
+              className="rounded-full bg-background shadow-none"
+              onClick={handleSignOut}
+            >
+              Sign Out
+            </Button>
           </div>
         </div>
       </header>
@@ -43,20 +87,22 @@ export default function BarbersShell() {
           <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-primary text-primary-foreground">
             <Scissors className="size-7" strokeWidth={1.5} aria-hidden="true" />
           </div>
-          <p className="mt-8 text-xs font-bold uppercase tracking-[0.24em] text-muted-foreground">Your Barberly space</p>
+          <p className="mt-8 text-xs font-bold uppercase tracking-[0.24em] text-muted-foreground">
+            Your Barberly space
+          </p>
           <h1 className="font-display mt-4 text-5xl font-semibold leading-[0.95] sm:text-7xl">
-            {isBarber ? "Your chair, your craft." : "A better cut is close."}
+            {isShop ? "Your chair, your craft." : "A better cut is close."}
           </h1>
           <div className="mx-auto mt-8 max-w-2xl space-y-3 text-muted-foreground">
             <p className="text-lg leading-8">
-              {isBarber
-                ? "理髮師後台即將上線 — 下一個里程碑會加上個人檔案、服務項目與排班管理。"
-                : "附近的理髮師即將上線 — 下一個里程碑會加上瀏覽與預約功能。"}
+              {isShop
+                ? "理髮店後台已經開好了 —— 上架理髮師、列服務與價格、發布可預約時段。"
+                : "附近的理髮師即將上線。想把自己的店搬上來？點右上角的「開店」。"}
             </p>
             <p className="text-sm leading-7">
-              {isBarber
-                ? "Your barber dashboard is coming soon — profile, services & schedule arrive in the next milestone."
-                : "Barbers near you are coming soon — browse & booking arrive in the next milestone."}
+              {isShop
+                ? "Your shop dashboard is ready — list barbers, set services & prices, publish slots."
+                : "Barbers near you are coming soon. Running a shop? Use “Become a shop” above."}
             </p>
           </div>
         </div>

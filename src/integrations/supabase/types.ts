@@ -14,6 +14,149 @@ export type Database = {
   }
   public: {
     Tables: {
+      barber_photos: {
+        Row: {
+          barber_id: string
+          caption: string | null
+          created_at: string
+          id: string
+          is_featured: boolean
+          sort_order: number
+          storage_path: string
+        }
+        Insert: {
+          barber_id: string
+          caption?: string | null
+          created_at?: string
+          id?: string
+          is_featured?: boolean
+          sort_order?: number
+          storage_path: string
+        }
+        Update: {
+          barber_id?: string
+          caption?: string | null
+          created_at?: string
+          id?: string
+          is_featured?: boolean
+          sort_order?: number
+          storage_path?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "barber_photos_barber_id_fkey"
+            columns: ["barber_id"]
+            isOneToOne: false
+            referencedRelation: "barbers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "barber_photos_barber_id_fkey"
+            columns: ["barber_id"]
+            isOneToOne: false
+            referencedRelation: "barbers_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      barbers: {
+        Row: {
+          address: string | null
+          created_at: string
+          id: string
+          intro: string | null
+          name: string
+          shop_id: string
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string
+          id?: string
+          intro?: string | null
+          name: string
+          shop_id: string
+        }
+        Update: {
+          address?: string | null
+          created_at?: string
+          id?: string
+          intro?: string | null
+          name?: string
+          shop_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "barbers_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bookable_slots: {
+        Row: {
+          barber_id: string
+          created_at: string
+          ends_at: string
+          id: string
+          starts_at: string
+        }
+        Insert: {
+          barber_id: string
+          created_at?: string
+          ends_at: string
+          id?: string
+          starts_at: string
+        }
+        Update: {
+          barber_id?: string
+          created_at?: string
+          ends_at?: string
+          id?: string
+          starts_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bookable_slots_barber_id_fkey"
+            columns: ["barber_id"]
+            isOneToOne: false
+            referencedRelation: "barbers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookable_slots_barber_id_fkey"
+            columns: ["barber_id"]
+            isOneToOne: false
+            referencedRelation: "barbers_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      platform_settings: {
+        Row: {
+          currency: string
+          currency_minor_units: number
+          id: boolean
+          slot_minutes: number
+          updated_at: string
+        }
+        Insert: {
+          currency?: string
+          currency_minor_units?: number
+          id?: boolean
+          slot_minutes?: number
+          updated_at?: string
+        }
+        Update: {
+          currency?: string
+          currency_minor_units?: number
+          id?: boolean
+          slot_minutes?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           bank_account_name: string | null
@@ -44,12 +187,91 @@ export type Database = {
         }
         Relationships: []
       }
+      services: {
+        Row: {
+          barber_id: string
+          category: string
+          created_at: string
+          id: string
+          name: string
+          price: number
+          required_slots: number
+        }
+        Insert: {
+          barber_id: string
+          category: string
+          created_at?: string
+          id?: string
+          name: string
+          price: number
+          required_slots: number
+        }
+        Update: {
+          barber_id?: string
+          category?: string
+          created_at?: string
+          id?: string
+          name?: string
+          price?: number
+          required_slots?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "services_barber_id_fkey"
+            columns: ["barber_id"]
+            isOneToOne: false
+            referencedRelation: "barbers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "services_barber_id_fkey"
+            columns: ["barber_id"]
+            isOneToOne: false
+            referencedRelation: "barbers_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
-      [_ in never]: never
+      barbers_public: {
+        Row: {
+          address: string | null
+          created_at: string | null
+          id: string | null
+          intro: string | null
+          name: string | null
+          shop_id: string | null
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string | null
+          id?: string | null
+          intro?: string | null
+          name?: string | null
+          shop_id?: string | null
+        }
+        Update: {
+          address?: string | null
+          created_at?: string | null
+          id?: string | null
+          intro?: string | null
+          name?: string | null
+          shop_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "barbers_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
-      [_ in never]: never
+      is_admin: { Args: never; Returns: boolean }
     }
     Enums: {
       [_ in never]: never

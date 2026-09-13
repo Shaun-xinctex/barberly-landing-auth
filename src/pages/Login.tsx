@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { usePageMeta } from "@/hooks/use-page-meta";
 import { supabase } from "@/integrations/supabase/client";
+import { fetchMyProfile, routeForRole } from "@/lib/profile";
 
 type Role = "customer" | "shop";
 type Mode = "signin" | "signup";
@@ -28,9 +29,15 @@ export default function LoginPage({ initialMode = "signin" }: { initialMode?: Mo
   const [message, setMessage] = useState<string | null>(null);
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      if (data.user) navigate("/barbers", { replace: true });
+    let active = true;
+    supabase.auth.getUser().then(async ({ data }) => {
+      if (!data.user || !active) return;
+      const profile = await fetchMyProfile();
+      if (active) navigate(routeForRole(profile?.role), { replace: true });
     });
+    return () => {
+      active = false;
+    };
   }, [navigate]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -42,7 +49,7 @@ export default function LoginPage({ initialMode = "signin" }: { initialMode?: Mo
       ? await supabase.auth.signUp({
           email,
           password,
-          options: { data: { role }, emailRedirectTo: window.location.origin },
+          options: { data: { role }, emailRedirectTo: `${window.location.origin}/login` },
         })
       : await supabase.auth.signInWithPassword({ email, password });
 
@@ -58,7 +65,9 @@ export default function LoginPage({ initialMode = "signin" }: { initialMode?: Mo
       return;
     }
 
-    navigate("/barbers", { replace: true });
+    // Route by profiles.role — M1.1 branches shop / customer only.
+    const profile = await fetchMyProfile();
+    navigate(routeForRole(profile?.role), { replace: true });
   }
 
   return (
@@ -134,4 +143,4 @@ export default function LoginPage({ initialMode = "signin" }: { initialMode?: Mo
       </section>
     </main>
   );
-}
+}
