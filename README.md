@@ -91,11 +91,11 @@ fully static bundle to `dist/`, deployed to Vercel as a static site.
 | `/login` | Combined sign-in / sign-up |
 | `/sign-in` | Same page, sign-in tab preselected |
 | `/sign-up` | Same page, sign-up tab preselected |
-| `/app` | Authenticated shell (redirects to `/login` when signed out) |
-| `/barbers` | Legacy path — redirects to `/app` |
+| `/barbers` | Authenticated shell (redirects to `/login` when signed out) |
+| `/app` | Alias — redirects to `/barbers` |
 | anything else | 404 page |
 
-Deep links such as `/app` are served by the SPA fallback in `vercel.json`
+Deep links such as `/barbers` are served by the SPA fallback in `vercel.json`
 (every path rewrites to `/index.html`, after the static-file check), then
 resolved client-side by React Router.
 

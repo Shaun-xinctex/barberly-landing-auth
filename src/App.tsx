@@ -33,9 +33,10 @@ export default function App() {
           <Route path="/sign-in" element={<Login initialMode="signin" />} />
           <Route path="/sign-up" element={<Login initialMode="signup" />} />
 
-          {/* Authenticated app shell. */}
+          {/* Authenticated app shell. /barbers is the canonical post-login
+              route for this project — see .claude/skills/m0-landing-page. */}
           <Route
-            path="/app"
+            path="/barbers"
             element={
               <RequireAuth>
                 <AppSpace />
@@ -43,8 +44,8 @@ export default function App() {
             }
           />
 
-          {/* Pre-SPA path kept working. */}
-          <Route path="/barbers" element={<Navigate to="/app" replace />} />
+          {/* Earlier alias kept working so old links don't break. */}
+          <Route path="/app" element={<Navigate to="/barbers" replace />} />
 
           <Route path="*" element={<NotFound />} />
         </Routes>

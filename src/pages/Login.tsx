@@ -29,7 +29,7 @@ export default function LoginPage({ initialMode = "signin" }: { initialMode?: Mo
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
-      if (data.user) navigate("/app", { replace: true });
+      if (data.user) navigate("/barbers", { replace: true });
     });
   }, [navigate]);
 
@@ -58,7 +58,7 @@ export default function LoginPage({ initialMode = "signin" }: { initialMode?: Mo
       return;
     }
 
-    navigate("/app", { replace: true });
+    navigate("/barbers", { replace: true });
   }
 
   return (
