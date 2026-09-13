@@ -227,11 +227,16 @@ export function BookDialog({
                     aria-pressed={isStart}
                     className={[
                       "rounded-full border px-3.5 py-1.5 text-sm transition-colors",
-                      !legal
-                        ? "cursor-not-allowed border-dashed border-border text-muted-foreground/50"
-                        : held
-                          ? "border-primary bg-primary/10"
-                          : "border-border hover:bg-secondary",
+                      // `held` wins over `!legal`: the LAST slot of a 3-slot run is
+                      // usually not a legal START itself, and showing it dimmed while
+                      // the summary says the booking runs through it is exactly the
+                      // contradiction this dialog is supposed to avoid. A held slot
+                      // always reads as part of your booking; it just stays unclickable.
+                      held
+                        ? "border-primary bg-primary/10"
+                        : legal
+                          ? "border-border hover:bg-secondary"
+                          : "cursor-not-allowed border-dashed border-border text-muted-foreground/50",
                       isStart ? "ring-2 ring-primary ring-offset-1" : "",
                     ].join(" ")}
                   >
