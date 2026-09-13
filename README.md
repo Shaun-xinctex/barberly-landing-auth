@@ -42,8 +42,8 @@ The site must include:
     (destination is a placeholder for v1).
     - Footer with copyright "© 2026 Barberly".
 
-2. Authentication using Lovable's built-in Supabase-style auth (Lovable Cloud
-    is fine for v1; we'll swap to a user-owned Supabase project later):
+2. Authentication using the project's own Supabase project
+    (`kzzyiybvhtmcqigzrojy`, ap-southeast-2):
     - A combined Sign Up / Sign In page at /login with email + password.
     - On the Sign Up form, include a role selector as a TAB / segmented toggle
     at the top of the form with two options labeled "Customer" (role value
@@ -73,16 +73,6 @@ schedule tables, the booking flow, payments, and any custom database tables
 default auth.users; capture the chosen role in auth user metadata only). Those
 come in later milestones. Stick to landing page + role-tab auth + the
 role-aware /barbers placeholder shell.
-
-This project was built with [Lovable](https://lovable.dev).
-
-## Build with Lovable
-
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/ccc6fb09-c182-471b-b9f2-2b075d2f838a).
-
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: every change made in Lovable is committed straight to this repository.
-- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
 
 ## Stack
 
@@ -124,14 +114,19 @@ npm run preview  # serve the built bundle locally
 
 ### Environment variables
 
-The Supabase client reads these at build time (they must be set in Vercel's
-project settings as well as in local `.env`):
+The Supabase client reads these at build time. They must be set both in a
+local `.env` (see `.env.example`) and in the Vercel project's Environment
+Variables — a build without them fails fast at startup.
 
 ```
-VITE_SUPABASE_URL
-VITE_SUPABASE_PUBLISHABLE_KEY
-VITE_SUPABASE_PROJECT_ID
+VITE_SUPABASE_URL              https://kzzyiybvhtmcqigzrojy.supabase.co
+VITE_SUPABASE_PUBLISHABLE_KEY  sb_publishable_...
+VITE_SUPABASE_PROJECT_ID       kzzyiybvhtmcqigzrojy
 ```
+
+`VITE_SUPABASE_PUBLISHABLE_KEY` holds Supabase's current-generation browser
+key (`sb_publishable_*`), which replaces the key formerly called the anon key.
+It is safe to expose: access is gated by Row Level Security.
 
 ## Deploying to Vercel
 
