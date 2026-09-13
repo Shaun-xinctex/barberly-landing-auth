@@ -11,6 +11,7 @@ import BarberDetail from "@/pages/BarberDetail";
 import Barbers from "@/pages/Barbers";
 import Landing from "@/pages/Landing";
 import Login from "@/pages/Login";
+import MyBookings from "@/pages/MyBookings";
 import NotFound from "@/pages/NotFound";
 import ShopBookings from "@/pages/ShopBookings";
 import ShopOnboarding from "@/pages/ShopOnboarding";
@@ -47,6 +48,16 @@ export default function App() {
           {/* A uuid barber id, so this public detail route never collides with the
               shop-management routes under /shop. */}
           <Route path="/barbers/:id" element={<BarberDetail />} />
+          {/* Auth-gated: a customer's own bookings. RLS is what actually scopes the
+              rows; the guard just keeps anonymous visitors off the page. */}
+          <Route
+            path="/bookings"
+            element={
+              <RequireAuth>
+                <MyBookings />
+              </RequireAuth>
+            }
+          />
 
           {/* Shop-side surfaces. RequireShop gates on profiles.role === "shop". */}
           <Route
