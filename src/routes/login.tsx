@@ -133,9 +133,9 @@ function LoginPage() {
 
           <p className="mt-7 text-center text-sm text-muted-foreground">
             {mode === "signin" ? "New to Barberly?" : "Already have an account?"}{" "}
-            <button type="button" className="cursor-pointer font-semibold text-foreground underline underline-offset-4" onClick={() => setMode(mode === "signin" ? "signup" : "signin")}>
+            <Button type="button" variant="link" className="h-auto p-0 font-semibold" onClick={() => setMode(mode === "signin" ? "signup" : "signin")}>
               {mode === "signin" ? "Create an account" : "Sign in"}
-            </button>
+            </Button>
           </p>
         </div>
       </section>
