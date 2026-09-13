@@ -206,12 +206,21 @@ export default function BarberDetail() {
 
   const photos = useMemo(() => sortPhotos(barber?.barber_photos ?? []), [barber]);
 
-  // The shortest service a barber offers decides whether ANY start time is legal —
-  // used only to tell the customer why the Book button has nothing to offer.
+  // Why Book might have nothing to offer — the two reasons are different and the
+  // button should say which. A barber with a published schedule but no service
+  // still cannot be booked: the service is what carries the price and how many
+  // slots get held.
+  const hasServices = (barber?.services ?? []).length > 0;
   const bookableNow = useMemo(() => {
     const services = barber?.services ?? [];
     return services.some((service) => startSlotRuns(slots, service.required_slots).size > 0);
   }, [barber, slots]);
+
+  const bookLabel = hasServices
+    ? bookableNow
+      ? "Book"
+      : "No slots available"
+    : "No services yet";
 
   const [bookingOpen, setBookingOpen] = useState(false);
 
@@ -292,7 +301,7 @@ export default function BarberDetail() {
             onClick={handleBook}
             disabled={!bookableNow}
           >
-            {bookableNow ? "Book" : "No slots available"}
+            {bookLabel}
           </Button>
         </div>
 
