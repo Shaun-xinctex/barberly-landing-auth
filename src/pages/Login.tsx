@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState, type FormEvent } from "react";
 import { ArrowLeft, Eye, EyeOff, Scissors } from "lucide-react";
 
@@ -20,6 +20,16 @@ export default function LoginPage({ initialMode = "signin" }: { initialMode?: Mo
   });
 
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // A customer sent here from a Book button carries the page they came from, so
+  // signing in returns them to that barber instead of dumping them back on the
+  // browse grid. Everyone else routes by profiles.role as before.
+  const cameFrom =
+    typeof (location.state as { from?: unknown } | null)?.from === "string"
+      ? ((location.state as { from: string }).from)
+      : null;
+
   const [mode, setMode] = useState<Mode>(initialMode);
   const [role, setRole] = useState<Role>("customer");
   const [email, setEmail] = useState("");
@@ -33,12 +43,12 @@ export default function LoginPage({ initialMode = "signin" }: { initialMode?: Mo
     supabase.auth.getUser().then(async ({ data }) => {
       if (!data.user || !active) return;
       const profile = await fetchMyProfile();
-      if (active) navigate(routeForRole(profile?.role), { replace: true });
+      if (active) navigate(cameFrom ?? routeForRole(profile?.role), { replace: true });
     });
     return () => {
       active = false;
     };
-  }, [navigate]);
+  }, [cameFrom, navigate]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -67,7 +77,7 @@ export default function LoginPage({ initialMode = "signin" }: { initialMode?: Mo
 
     // Route by profiles.role — M1.1 branches shop / customer only.
     const profile = await fetchMyProfile();
-    navigate(routeForRole(profile?.role), { replace: true });
+    navigate(cameFrom ?? routeForRole(profile?.role), { replace: true });
   }
 
   return (
@@ -143,4 +153,4 @@ export default function LoginPage({ initialMode = "signin" }: { initialMode?: Mo
       </section>
     </main>
   );
-}
+}

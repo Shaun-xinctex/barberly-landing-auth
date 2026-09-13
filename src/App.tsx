@@ -5,7 +5,9 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import { AppErrorBoundary } from "@/components/error-boundary";
 import { RequireAuth } from "@/components/require-auth";
 import { RequireShop } from "@/components/require-shop";
+import { Toaster } from "@/components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
+import BarberDetail from "@/pages/BarberDetail";
 import Barbers from "@/pages/Barbers";
 import Landing from "@/pages/Landing";
 import Login from "@/pages/Login";
@@ -42,6 +44,9 @@ export default function App() {
               account. The signed-in shell that used to live here is gone — its one
               action, "Become a shop", moved into <SiteHeader>. */}
           <Route path="/barbers" element={<Barbers />} />
+          {/* A uuid barber id, so this public detail route never collides with the
+              shop-management routes under /shop. */}
+          <Route path="/barbers/:id" element={<BarberDetail />} />
 
           {/* Shop-side surfaces. RequireShop gates on profiles.role === "shop". */}
           <Route
@@ -70,6 +75,7 @@ export default function App() {
 
           <Route path="*" element={<NotFound />} />
         </Routes>
+        <Toaster />
       </QueryClientProvider>
     </AppErrorBoundary>
   );
