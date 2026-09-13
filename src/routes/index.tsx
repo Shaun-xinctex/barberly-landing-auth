@@ -118,11 +118,11 @@ function Index() {
         </div>
       </header>
 
-      <section className="relative mx-auto min-h-[720px] max-w-[1500px] px-5 pb-16 pt-16 md:min-h-[760px] md:px-8 md:pt-20">
-        <div className="absolute left-0 top-20 h-[360px] w-[25%] min-w-40 overflow-hidden rounded-r-md md:h-[500px] md:w-[28%]">
+      <section className="relative mx-auto max-w-[1500px] px-5 pb-16 pt-16 md:min-h-[760px] md:px-8 md:pt-20">
+        <div className="absolute left-0 top-20 hidden h-[500px] w-[28%] min-w-40 overflow-hidden rounded-r-md md:block">
           <img src={heroLeft} alt="Barber in a modern studio" width={960} height={1280} className="h-full w-full object-cover object-center" />
         </div>
-        <div className="absolute right-0 top-44 h-[340px] w-[24%] min-w-36 overflow-hidden rounded-l-md md:top-28 md:h-[520px] md:w-[27%]">
+        <div className="absolute right-0 top-28 hidden h-[520px] w-[27%] min-w-36 overflow-hidden rounded-l-md md:block">
           <img src={heroRight} alt="Hairstylist in a modern salon" width={960} height={1280} className="h-full w-full object-cover object-center" />
         </div>
 
@@ -131,6 +131,10 @@ function Index() {
           <h1 className="font-display max-w-3xl text-6xl font-semibold leading-[0.88] text-foreground sm:text-7xl md:text-8xl lg:text-[7.8rem]">
             Style with<br />Confident Hair
           </h1>
+          <div className="mt-8 grid h-72 w-full grid-cols-2 gap-2 md:hidden">
+            <div className="overflow-hidden rounded-md"><img src={heroLeft} alt="Barber in a modern studio" width={960} height={1280} className="h-full w-full object-cover object-center" /></div>
+            <div className="overflow-hidden rounded-md"><img src={heroRight} alt="Hairstylist in a modern salon" width={960} height={1280} className="h-full w-full object-cover object-center" /></div>
+          </div>
           <p className="mt-7 max-w-md text-sm leading-7 text-muted-foreground md:text-base">
             Discover exceptional barbers, compare their craft, and find the cut that feels unmistakably yours.
           </p>

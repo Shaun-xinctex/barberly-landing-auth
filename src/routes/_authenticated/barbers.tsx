@@ -22,7 +22,7 @@ function BarbersShell() {
   const { user } = Route.useRouteContext();
   const { queryClient } = Route.useRouteContext();
   const navigate = useNavigate();
-  const isBarber = user.user_metadata?.role === "shop";
+  const isBarber = user.user_metadata?.["role"] === "shop";
 
   async function handleSignOut() {
     await queryClient.cancelQueries();
