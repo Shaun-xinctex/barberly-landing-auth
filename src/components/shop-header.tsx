@@ -37,6 +37,9 @@ export function ShopHeader() {
           <NavLink to="/shop/bookings" className={navLinkClass}>
             Services &amp; slots
           </NavLink>
+          <NavLink to="/shop/earnings" className={navLinkClass}>
+            Earnings
+          </NavLink>
         </nav>
         <div className="ml-auto flex flex-wrap items-center justify-end gap-3">
           <span className="max-w-[15rem] truncate text-sm text-muted-foreground">{user.email}</span>

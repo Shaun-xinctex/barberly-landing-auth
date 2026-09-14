@@ -27,6 +27,10 @@ export function SiteHeader() {
   const navigate = useNavigate();
 
   const isShop = profile?.role === "shop";
+  // Defense in depth for reachability: the post-login redirect is the primary way
+  // an admin gets to /admin/payouts, but without a link they are stranded the
+  // moment they navigate away from it.
+  const isAdmin = profile?.role === "admin";
 
   const becomeShop = useMutation({
     mutationFn: async () => {
@@ -65,6 +69,11 @@ export function SiteHeader() {
               My bookings
             </NavLink>
           ) : null}
+          {isAdmin ? (
+            <NavLink to="/admin/payouts" className={navLinkClass}>
+              Payouts
+            </NavLink>
+          ) : null}
         </nav>
 
         <div className="ml-auto flex flex-wrap items-center justify-end gap-3">
@@ -74,7 +83,11 @@ export function SiteHeader() {
                 {user.email}
               </span>
               {isShop ? (
-                <Button asChild variant="outline" className="rounded-full bg-background shadow-none">
+                <Button
+                  asChild
+                  variant="outline"
+                  className="rounded-full bg-background shadow-none"
+                >
                   <Link to="/shop">理髮店後台 / Shop dashboard</Link>
                 </Button>
               ) : (

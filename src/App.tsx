@@ -3,10 +3,12 @@ import { useEffect, useState } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 
 import { AppErrorBoundary } from "@/components/error-boundary";
+import { RequireAdmin } from "@/components/require-admin";
 import { RequireAuth } from "@/components/require-auth";
 import { RequireShop } from "@/components/require-shop";
 import { Toaster } from "@/components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
+import AdminPayouts from "@/pages/AdminPayouts";
 import BarberDetail from "@/pages/BarberDetail";
 import BookingSuccess from "@/pages/BookingSuccess";
 import Barbers from "@/pages/Barbers";
@@ -15,6 +17,7 @@ import Login from "@/pages/Login";
 import MyBookings from "@/pages/MyBookings";
 import NotFound from "@/pages/NotFound";
 import ShopBookings from "@/pages/ShopBookings";
+import ShopEarnings from "@/pages/ShopEarnings";
 import ShopOnboarding from "@/pages/ShopOnboarding";
 
 export default function App() {
@@ -90,6 +93,32 @@ export default function App() {
                 <RequireShop>
                   <ShopBookings />
                 </RequireShop>
+              </RequireAuth>
+            }
+          />
+          {/* Read-only mirror of the settlement data for the shop: what is still
+              owed vs what is already in a payout batch, and that batch's status. */}
+          <Route
+            path="/shop/earnings"
+            element={
+              <RequireAuth>
+                <RequireShop>
+                  <ShopEarnings />
+                </RequireShop>
+              </RequireAuth>
+            }
+          />
+
+          {/* Admin-only settlement workbench (M2.2). RequireAdmin is UX only — the
+              real gate is RLS on payouts/profiles plus the admin-guarded RPCs, so a
+              non-admin who reached this route could neither read nor write anything. */}
+          <Route
+            path="/admin/payouts"
+            element={
+              <RequireAuth>
+                <RequireAdmin>
+                  <AdminPayouts />
+                </RequireAdmin>
               </RequireAuth>
             }
           />

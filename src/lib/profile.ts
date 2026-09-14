@@ -30,12 +30,22 @@ export function useMyProfile() {
 }
 
 /**
- * Where a user lands after signing in. M1.1 branches `shop` and `customer`
- * ONLY — there is no logged-in admin yet, so an admin branch would be
- * unreachable dead code pointing at a page that does not exist.
+ * Where a user lands after signing in.
+ *
+ * M1.1 deliberately branched `shop` and `customer` only — an admin branch would
+ * have pointed at a page that did not exist. M2.2 builds `/admin/payouts`, so the
+ * admin branch is added HERE, now that it has somewhere real to land. Without it
+ * an admin is dumped on the customer marketplace after every login.
  */
 export function routeForRole(role: string | null | undefined): string {
-  return role === "shop" ? "/shop" : "/barbers";
+  if (role === "shop") return "/shop";
+  if (role === "admin") return "/admin/payouts";
+  return "/barbers";
+}
+
+/** True for the promotion-only `admin` role (granted by migration, never in-app). */
+export function isAdminRole(role: string | null | undefined): boolean {
+  return role === "admin";
 }
 
 /** Shop onboarding is only complete once all three shop-level fields are filled. */
@@ -43,7 +53,7 @@ export function isShopOnboarded(profile: Profile | null | undefined): boolean {
   if (!profile) return false;
   return Boolean(
     profile.display_name?.trim() &&
-      profile.bank_account_name?.trim() &&
-      profile.bank_account_number?.trim(),
+    profile.bank_account_name?.trim() &&
+    profile.bank_account_number?.trim(),
   );
 }
