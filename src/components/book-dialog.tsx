@@ -128,12 +128,18 @@ export function BookDialog({
       // hosted page, not a route in this app.
       window.location.assign(checkoutUrl);
     },
-    onError: (err) => {
+    onError: async (err) => {
       // A PostgrestError is a plain object, so `instanceof Error` would swallow the
       // real message create_booking raised ("…just taken", "…has a gap").
       toast.error("Could not start the payment", {
         description: errMessage(err, "Something went wrong — please try again."),
       });
+      // The booking may already exist: create_booking runs BEFORE the checkout call, so a
+      // failure there leaves a pending_payment booking holding its slots. Refresh, or the
+      // customer keeps re-picking a slot their own orphaned booking is sitting on and
+      // keeps getting "just taken".
+      await queryClient.invalidateQueries({ queryKey: ["available-slots", barberId] });
+      await queryClient.invalidateQueries({ queryKey: ["my-bookings"] });
     },
   });
 
