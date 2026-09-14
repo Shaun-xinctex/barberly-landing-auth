@@ -180,6 +180,7 @@ export type Database = {
           price: number
           service_id: string
           status: string
+          stripe_payment_intent_id: string | null
           updated_at: string
         }
         Insert: {
@@ -191,6 +192,7 @@ export type Database = {
           price: number
           service_id: string
           status?: string
+          stripe_payment_intent_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -202,6 +204,7 @@ export type Database = {
           price?: number
           service_id?: string
           status?: string
+          stripe_payment_intent_id?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -220,6 +223,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      commission_rates: {
+        Row: {
+          effective_from: string
+          id: string
+          note: string | null
+          platform_pct: number
+        }
+        Insert: {
+          effective_from: string
+          id?: string
+          note?: string | null
+          platform_pct: number
+        }
+        Update: {
+          effective_from?: string
+          id?: string
+          note?: string | null
+          platform_pct?: number
+        }
+        Relationships: []
       }
       platform_settings: {
         Row: {

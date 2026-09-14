@@ -30,6 +30,39 @@ export async function createBooking(serviceId: string, startSlotId: string): Pro
 }
 
 /**
+ * Hand a `pending_payment` booking to Stripe and get back its hosted Checkout URL.
+ *
+ * The amount is NEVER sent from here. `/api/bookings/checkout` re-reads the booking's
+ * `price` snapshot with the service-role key and builds the line item server-side, so a
+ * tampered client cannot change what gets charged. All this call carries is the id.
+ */
+export async function startCheckout(bookingId: string): Promise<string> {
+  const response = await fetch("/api/bookings/checkout", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ booking_id: bookingId }),
+  });
+
+  // The route always answers JSON. An HTML body here means the SPA catch-all rewrite
+  // swallowed /api/* (see vercel.json) — surface that rather than a JSON parse error.
+  const raw = await response.text();
+  let payload: { url?: string; error?: string };
+  try {
+    payload = JSON.parse(raw) as { url?: string; error?: string };
+  } catch {
+    throw new Error(
+      `The checkout route returned ${response.status} but not JSON — /api/* is probably ` +
+        `being served the SPA shell instead of the serverless function.`,
+    );
+  }
+
+  if (!response.ok || !payload.url) {
+    throw new Error(payload.error ?? `Could not start checkout (HTTP ${response.status}).`);
+  }
+  return payload.url;
+}
+
+/**
  * A barber's still-bookable slots, soonest first.
  *
  * Availability is DERIVED, never stored: `bookable_slots` has no status column, so a

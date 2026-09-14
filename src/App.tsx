@@ -8,6 +8,7 @@ import { RequireShop } from "@/components/require-shop";
 import { Toaster } from "@/components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
 import BarberDetail from "@/pages/BarberDetail";
+import BookingSuccess from "@/pages/BookingSuccess";
 import Barbers from "@/pages/Barbers";
 import Landing from "@/pages/Landing";
 import Login from "@/pages/Login";
@@ -55,6 +56,18 @@ export default function App() {
             element={
               <RequireAuth>
                 <MyBookings />
+              </RequireAuth>
+            }
+          />
+          {/* Where Stripe returns after Checkout. Polls the booking; never writes —
+              the webhook is what marks a booking paid. Must sit BEFORE nothing in
+              particular (React Router v7 ranks by specificity, not order), but it is
+              auth-gated because the poll reads the customer's own RLS-scoped row. */}
+          <Route
+            path="/bookings/success"
+            element={
+              <RequireAuth>
+                <BookingSuccess />
               </RequireAuth>
             }
           />

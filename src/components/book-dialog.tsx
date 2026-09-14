@@ -12,7 +12,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import type { Tables } from "@/integrations/supabase/types";
-import { createBooking, startSlotRuns, type Slot } from "@/lib/bookings";
+import { createBooking, startCheckout, startSlotRuns, type Slot } from "@/lib/bookings";
 import { errMessage } from "@/lib/errors";
 
 type Service = Pick<Tables<"services">, "id" | "name" | "category" | "price" | "required_slots">;
@@ -49,9 +49,10 @@ function time(iso: string): string {
  * The booking modal. Service → date → start slot, price shown before Confirm, and the
  * customer never leaves `/barbers/:id`.
  *
- * M2.1 reuses this exact shape: Confirm keeps calling `createBooking()` and only gains
- * "→ open Stripe Checkout with the returned booking id" after it. Nothing here should
- * gate on `paid` / `paid_at` — a `pending_payment` booking is a complete M1.2 booking.
+ * M2.1 wired the promised seam: Confirm still calls `createBooking()` and then hands the
+ * returned booking id to `/api/bookings/checkout`, redirecting to Stripe. The booking is
+ * `pending_payment` until the WEBHOOK sees the payment — nothing on this screen decides
+ * that, and nothing here gates on `paid` / `paid_at`.
  */
 export function BookDialog({
   open,
@@ -108,21 +109,29 @@ export function BookDialog({
   const book = useMutation({
     mutationFn: async () => {
       if (!service || !startSlotId) throw new Error("pick a service and a start time first");
-      return createBooking(service.id, startSlotId);
+      // Unchanged from M1.2: ONE transaction creates the pending_payment booking plus
+      // its N booking_slots rows and snapshots the price. The slots are held from this
+      // moment — holding is not tied to payment. Only "confirmed" is.
+      const bookingId = await createBooking(service.id, startSlotId);
+      // M2.1: hand that booking to Stripe. The route reads the price SNAPSHOT
+      // server-side, so nothing about the amount travels through the browser.
+      return startCheckout(bookingId);
     },
-    onSuccess: async () => {
-      onOpenChange(false);
-      toast.success("Booked", {
-        description: "你的預約已建立，可以在「My bookings」看到。",
-      });
-      // The held slots must drop out of the availability anti-join on the next read.
+    onSuccess: async (checkoutUrl) => {
+      // Invalidate BEFORE leaving: the N slots are already held by the pending booking,
+      // so if the customer abandons Stripe and comes back, the availability list must
+      // already reflect that rather than offering a slot that will now fail.
       await queryClient.invalidateQueries({ queryKey: ["available-slots", barberId] });
       await queryClient.invalidateQueries({ queryKey: ["my-bookings"] });
+      onOpenChange(false);
+      // A full navigation, not a router push — checkout.stripe.com is Stripe's own
+      // hosted page, not a route in this app.
+      window.location.assign(checkoutUrl);
     },
     onError: (err) => {
       // A PostgrestError is a plain object, so `instanceof Error` would swallow the
       // real message create_booking raised ("…just taken", "…has a gap").
-      toast.error("Could not complete the booking", {
+      toast.error("Could not start the payment", {
         description: errMessage(err, "Something went wrong — please try again."),
       });
     },
@@ -133,7 +142,9 @@ export function BookDialog({
       <DialogContent className="max-h-[90vh] max-w-lg overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Book a slot</DialogTitle>
-          <DialogDescription>選擇服務、日期與開始時段。這個里程碑還不收費。</DialogDescription>
+          <DialogDescription>
+            選擇服務、日期與開始時段。按下 Confirm 會轉到 Stripe 完成付款。
+          </DialogDescription>
         </DialogHeader>
 
         {/* 1 — service first: it fixes both the price and how many slots get held. */}
@@ -188,7 +199,9 @@ export function BookDialog({
                   aria-pressed={key === day}
                   className={[
                     "rounded-full border px-3.5 py-1.5 text-sm transition-colors",
-                    key === day ? "border-primary bg-primary text-primary-foreground" : "border-border",
+                    key === day
+                      ? "border-primary bg-primary text-primary-foreground"
+                      : "border-border",
                   ].join(" ")}
                 >
                   {dayLabel(sample)}
@@ -248,8 +261,8 @@ export function BookDialog({
 
             {daySlots.some((slot) => !runs.has(slot.id)) ? (
               <p className="text-xs text-muted-foreground">
-                虛線的時段無法作為<strong>開始</strong>時間（後面湊不滿{" "}
-                {service.required_slots} 個連續時段），但從更早的時段開始時它仍可能被佔用。
+                虛線的時段無法作為<strong>開始</strong>時間（後面湊不滿 {service.required_slots}{" "}
+                個連續時段），但從更早的時段開始時它仍可能被佔用。
               </p>
             ) : null}
           </div>
@@ -287,7 +300,7 @@ export function BookDialog({
             onClick={() => book.mutate()}
             disabled={!service || !startSlotId || book.isPending}
           >
-            {book.isPending ? "Booking…" : "Confirm"}
+            {book.isPending ? "Redirecting…" : "Confirm & pay"}
           </Button>
         </DialogFooter>
       </DialogContent>
